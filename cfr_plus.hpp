@@ -12,50 +12,52 @@ class CFR;
 class Game {
 public:
 
-  Game(): actions({"R", "P", "S"}), players({0, 1}), history("") {}
-  Game(Game& game) {
-    this->players = game.players;
-    this->history = game.history;
+	Game(): actions({"R", "P", "S"}), players({0, 1}), history("") {}
+	Game(Game& game) {
+		this->players = game.players;
+		this->history = game.history;
 		this->actions = game.actions;
-  }
+	}
 
-	// @brief proceed game
-	// @param action action that the player takes on the node
-  std::string step(std::string action) {
-    history += action;
-    std::rotate(players.begin(), players.begin() + players.size() - 1, players.end());
-    return history;
-  }
-	
-	// @return index of current player
-  int& turn() { return players[0]; }
-	
-	// @return whether the node is terminal 
-  int terminal() {
-    if (history.size() == 2) return true;
+		// @brief proceed game
+		// @param action action that the player takes on the node
+	std::string step(std::string action) {
+		history += action;
+		std::rotate(players.begin(), players.begin() + players.size() - 1, players.end());
+		return history;
+	}
+		
+		// @return index of current player
+	int& turn() { return players[0]; }
+		
+		// @return whether the node is terminal 
+	int terminal() {
+		if (history.size() == 2) return true;
 		return false;
-  }
+	}
 
-	// @return utility for leaf node
-  int evaluate() {
-    if (history == "RR") return 0.;
-    if (history == "RP") return -1.;
-    if (history == "RS") return 2.;
-    if (history == "PR") return 1.;
-    if (history == "PP") return 0.;
-    if (history == "PS") return -2.;
-    if (history == "SR") return -2.;
-    if (history == "SP") return 2.;
-    if (history == "SS") return 0.;
-		return 0;
-  }
+		// @return utility for leaf node
+	int evaluate() {
+		if (history == "RR") return 0.;
+		if (history == "RP") return -1.;
+		if (history == "RS") return 2.;
+		if (history == "PR") return 1.;
+		if (history == "PP") return 0.;
+		if (history == "PS") return -2.;
+		if (history == "SR") return -2.;
+		if (history == "SP") return 2.;
+		if (history == "SS") return 0.;
+			return 0;
+	}
 
 private:
-  std::vector<std::string> actions;
-  std::vector<int> players;
-  std::string history;
+	std::vector<std::string> actions;
+	std::vector<int> players;
+	std::string history;
 	friend CFR;
 };
+
+
 
 class CFR {
 public:
@@ -79,27 +81,27 @@ public:
 	// @param game next game state
 	// @param p1 probability of player_1 reaching the node when player_1 plays according to strategy
 	// @param p2 probability of player_2 reaching the node when player_2 plays according to strategy
-  double expect_utility_recursively(Game& game, double p1, double p2){
-    if (game.terminal()) {
+	double expect_utility_recursively(Game& game, double p1, double p2) {
+		if (game.terminal()) {
 			return game.evaluate();
 		}
 		double expected_utility = 0.;
 		std::map<std::string, double> utility;
-    for (auto action : game.actions) {
-    	Game game_cp(game);
-      game_cp.step(action);
+		for (auto action : game.actions) {
+			Game game_cp(game);
+			game_cp.step(action);
 			utility[action] = game.turn() == 0
 				? expect_utility_recursively(game_cp, p1 * strategyArray[game.turn()][action], p2) * p2 * -1.
 				: expect_utility_recursively(game_cp, p1, p2 * strategyArray[game.turn()][action]) * p1 * -1. ;
 			expected_utility += utility[action] * strategyArray[game.turn()][action];
-    }
+		}
 		for (auto& [action, regret] : regretArray[game.turn()]) {
 			regretArray[game.turn()][action] += (utility[action] - expected_utility);
 			// reset negative over all regret
 			if (regretArray[game.turn()][action] < 0) regretArray[game.turn()][action] = 0;
 		}
-    return expected_utility;
-  }
+		return expected_utility;
+	}
 
 	// @brief update strategy in each information set for both players
 	void update_strategy() {
@@ -143,8 +145,6 @@ public:
 		double expected_utility = expect_utility_recursively(game, 1., 1.);
 		update_strategy();
 		update_sum_strategy();
-		
-		// std::cout << utility << std::endl;
 	}
 
 	// @return strategy in each information set
@@ -155,7 +155,7 @@ public:
 	std::vector<std::map<std::string, double>>& getRegretArray() { return regretArray; }
 
 private:
-  std::vector<std::map<std::string, double>> strategyArray;
+  	std::vector<std::map<std::string, double>> strategyArray;
 	std::vector<std::map<std::string, double>> sumStrategyArray;
-  std::vector<std::map<std::string, double>> regretArray;
+  	std::vector<std::map<std::string, double>> regretArray;
 };
