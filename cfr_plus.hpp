@@ -77,10 +77,8 @@ public:
 
 	// @brief minimize counter factual regret
 	// @param game next game state
-	// @param p1 probability of player_1 reaching the node 
-	//           when player_1 plays according to strategy
-	// @param p2 probability of player_2 reaching the node 
-	//           when player_2 plays according to strategy
+	// @param p1 probability of player_1 reaching the node when player_1 plays according to strategy
+	// @param p2 probability of player_2 reaching the node when player_2 plays according to strategy
   double expect_utility_recursively(Game& game, double p1, double p2){
     if (game.terminal()) {
 			return game.evaluate();
