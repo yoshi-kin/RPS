@@ -11,6 +11,7 @@
 class CFR;
 class Game {
 public:
+
   Game(): actions({"R", "P", "S"}), players({0, 1}), history("") {}
   Game(Game& game) {
     this->players = game.players;
